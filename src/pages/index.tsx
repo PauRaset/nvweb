@@ -1,7 +1,8 @@
-// app/page.tsx
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
 
 const userFeatures = [
   {
@@ -44,7 +45,73 @@ const clubFeatures = [
   },
 ];
 
+// 👇 Aquí defines las pantallas que quieres enseñar en el mockup
+const appScreens = [
+  {
+    id: "feed",
+    title: "Feed de eventos",
+    description:
+      "Descubre los mejores eventos de tu ciudad, ordenados por fecha, distancia y vibe.",
+    image: "/screens/feed.png",
+  },
+  {
+    id: "map",
+    title: "Mapa en tiempo real",
+    description:
+      "Visualiza los clubs y eventos sobre un mapa para decidir rápido dónde ir esta noche.",
+    image: "/screens/map.png",
+  },
+  {
+    id: "levels",
+    title: "Sistema de niveles",
+    description:
+      "Completa retos, demuestra que has ido y sube de nivel para desbloquear ventajas exclusivas.",
+    image: "/screens/levels.png",
+  },
+  {
+    id: "profile",
+    title: "Perfil NightVibe",
+    description:
+      "Tu historial de noches, logros y clubs favoritos, todo en un solo sitio.",
+    image: "/screens/profile.png",
+  },
+];
+
 export default function Home() {
+  const [activeScreenId, setActiveScreenId] = useState(appScreens[0].id);
+
+  // refs para las tarjetas de explicación que controlan el scroll
+  const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const indexAttr = entry.target.getAttribute("data-index");
+            const index = indexAttr ? parseInt(indexAttr, 10) : NaN;
+            const screen = appScreens[index];
+            if (screen) {
+              setActiveScreenId(screen.id);
+            }
+          }
+        });
+      },
+      {
+        threshold: 0.5,
+      },
+    );
+
+    sectionRefs.current.forEach((el) => {
+      if (el) observer.observe(el);
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
+  const activeScreen =
+    appScreens.find((s) => s.id === activeScreenId) ?? appScreens[0];
+
   return (
     <div className="min-h-screen bg-[#050816] text-white">
       {/* Glow de fondo */}
@@ -57,8 +124,15 @@ export default function Home() {
       <header className="sticky top-0 z-30 border-b border-white/5 bg-black/40 backdrop-blur-xl">
         <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
           <Link href="#hero" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-tr from-cyan-400 to-purple-500 text-xs font-bold">
-              NV
+            <div className="relative h-8 w-8 overflow-hidden rounded-xl bg-white/5">
+              {/* 👇 Cambia la ruta al logo que pongas en /public */}
+              <Image
+                src="/logo-nightvibe.png"
+                alt="NightVibe logo"
+                fill
+                className="object-contain"
+                priority
+              />
             </div>
             <span className="text-sm font-semibold tracking-tight sm:text-base">
               NightVibe
@@ -117,7 +191,7 @@ export default function Home() {
 
             <div className="flex flex-wrap items-center gap-3">
               <a
-                href="#que-es"
+                href="#app-demo"
                 className="group inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-black shadow-lg shadow-cyan-400/30 transition hover:-translate-y-0.5 hover:shadow-xl"
               >
                 Ver cómo funciona
@@ -139,67 +213,89 @@ export default function Home() {
             </p>
           </div>
 
-          {/* Mockup móvil */}
+          {/* Mockup móvil del hero: usa la pantalla activa */}
           <div className="mt-6 flex flex-1 items-center justify-center md:mt-0">
             <div className="relative">
               <div className="absolute -inset-4 rounded-[2.5rem] bg-gradient-to-tr from-cyan-500/40 via-purple-500/30 to-transparent blur-2xl" />
               <div className="relative h-[420px] w-[220px] rounded-[2.5rem] border border-white/15 bg-gradient-to-b from-white/10 via-black/40 to-black/80 p-3 shadow-2xl shadow-cyan-500/30">
                 <div className="mx-auto mb-3 h-1 w-16 rounded-full bg-white/20" />
-                <div className="h-full w-full overflow-hidden rounded-3xl bg-black/80">
-                  {/* Contenido "fake" de la app */}
-                  <div className="flex h-full flex-col">
-                    <div className="flex items-center justify-between border-b border-white/10 px-3 py-3">
-                      <span className="text-xs font-semibold">NightVibe</span>
-                      <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] text-emerald-300">
-                        Nivel 3
-                      </span>
-                    </div>
-                    <div className="relative flex-1">
-                      <div className="absolute inset-0 bg-gradient-to-b from-cyan-500/10 via-black to-black" />
-                      <div className="relative h-full w-full p-3 text-[10px] text-white/80">
-                        <p className="text-[11px] font-semibold">
-                          Esta noche · Cerca de ti
-                        </p>
-                        <div className="mt-2 space-y-2">
-                          <div className="rounded-2xl bg-white/5 p-2">
-                            <p className="text-[10px] font-semibold">
-                              Techno Glow Night
-                            </p>
-                            <p className="text-[9px] text-white/60">
-                              Club Aurora · 00:30h
-                            </p>
-                            <button className="mt-1 inline-flex items-center gap-1 rounded-full bg-cyan-500/90 px-2 py-0.5 text-[9px] font-semibold text-black">
-                              Asistir ✓
-                            </button>
-                          </div>
-                          <div className="rounded-2xl bg-white/3 p-2">
-                            <p className="text-[10px] font-semibold">
-                              Reggaeton vs Trap
-                            </p>
-                            <p className="text-[9px] text-white/60">
-                              Urban Hall · 01:00h
-                            </p>
-                          </div>
-                        </div>
+                <div className="relative h-full w-full overflow-hidden rounded-3xl bg-black/90">
+                  {/* 👇 Aquí mostramos la imagen de la pantalla activa */}
+                  <Image
+                    src={activeScreen.image}
+                    alt={activeScreen.title}
+                    fill
+                    className="object-cover"
+                    priority
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
-                        <div className="mt-3 border-t border-white/10 pt-2">
-                          <p className="text-[9px] text-white/60">
-                            Desbloquea tu próximo nivel completando 2 retos esta
-                            noche.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-around border-t border-white/10 bg-black/80 py-2 text-[9px] text-white/50">
-                      <span className="flex flex-col items-center gap-0.5">
-                        <span className="h-1 w-1 rounded-full bg-cyan-400" />
-                        Feed
-                      </span>
-                      <span>Mapa</span>
-                      <span>Niveles</span>
-                      <span>Perfil</span>
-                    </div>
+        {/* DEMO APP CON SCROLL */}
+        <section
+          id="app-demo"
+          className="mt-20 grid gap-10 md:grid-cols-[minmax(0,1.1fr),minmax(0,0.9fr)] md:items-start"
+        >
+          {/* Tarjetas explicando cada pantalla */}
+          <div className="space-y-5 text-sm">
+            <h2 className="text-xl font-semibold tracking-tight sm:text-2xl">
+              Así se ve NightVibe por dentro.
+            </h2>
+            <p className="max-w-xl text-sm text-white/70 sm:text-base">
+              Desplázate para ver cómo funcionan las principales pantallas de
+              la app. El móvil de la derecha irá cambiando automáticamente.
+            </p>
+
+            <div className="mt-4 space-y-4">
+              {appScreens.map((screen, index) => {
+                const isActive = screen.id === activeScreenId;
+                return (
+                  <div
+                    key={screen.id}
+                    ref={(el) => {
+                      sectionRefs.current[index] = el;
+                    }}
+                    data-index={index}
+                    className={`cursor-default rounded-2xl border p-4 transition ${
+                      isActive
+                        ? "border-cyan-400/70 bg-white/10"
+                        : "border-white/10 bg-white/5 hover:border-cyan-400/40 hover:bg-white/10"
+                    }`}
+                    onMouseEnter={() => setActiveScreenId(screen.id)}
+                  >
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-cyan-300">
+                      {`Pantalla ${index + 1}`.toUpperCase()}
+                    </p>
+                    <h3 className="mt-1 text-sm font-semibold">
+                      {screen.title}
+                    </h3>
+                    <p className="mt-1 text-xs text-white/70">
+                      {screen.description}
+                    </p>
                   </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Mockup sticky para scroll */}
+          <div className="flex justify-center md:sticky md:top-28">
+            <div className="relative">
+              <div className="absolute -inset-4 rounded-[2.5rem] bg-gradient-to-tr from-cyan-500/40 via-purple-500/30 to-transparent blur-2xl" />
+              <div className="relative h-[420px] w-[220px] rounded-[2.5rem] border border-white/15 bg-gradient-to-b from-white/10 via-black/40 to-black/80 p-3 shadow-2xl shadow-cyan-500/30">
+                <div className="mx-auto mb-3 h-1 w-16 rounded-full bg-white/20" />
+                <div className="relative h-full w-full overflow-hidden rounded-3xl bg-black/90">
+                  {/* Mismo contenido que en el hero, pero sticky */}
+                  <Image
+                    src={activeScreen.image}
+                    alt={activeScreen.title}
+                    fill
+                    className="object-cover"
+                    priority
+                  />
                 </div>
               </div>
             </div>
@@ -212,8 +308,8 @@ export default function Home() {
             Una red social que ocurre en el mundo real.
           </h2>
           <p className="max-w-2xl text-sm text-white/70 sm:text-base">
-            NightVibe no es solo una app de eventos ni solo una red social.
-            Es el puente entre lo que vives de noche y tu vida digital: cada
+            NightVibe no es solo una app de eventos ni solo una red social. Es
+            el puente entre lo que vives de noche y tu vida digital: cada
             salida, cada club y cada nivel cuentan para construir tu historia.
           </p>
 
@@ -244,7 +340,10 @@ export default function Home() {
         </section>
 
         {/* PARA USUARIOS */}
-        <section id="users" className="mt-20 grid gap-10 md:grid-cols-[1.2fr,1fr] md:items-center">
+        <section
+          id="users"
+          className="mt-20 grid gap-10 md:grid-cols-[1.2fr,1fr] md:items-center"
+        >
           <div>
             <h2 className="text-xl font-semibold tracking-tight sm:text-2xl">
               Para fiesteros que quieren algo más que subir stories.
@@ -291,8 +390,8 @@ export default function Home() {
                     Sube pruebas, completa retos, sube de nivel
                   </p>
                   <p className="text-xs text-white/70">
-                    Demuestra que has estado allí, completa misiones y desbloquea
-                    niveles con ventajas reales en clubs y eventos.
+                    Demuestra que has estado allí, completa misiones y
+                    desbloquea niveles con ventajas reales en clubs y eventos.
                   </p>
                 </div>
               </li>
@@ -341,16 +440,19 @@ export default function Home() {
               </p>
 
               <div className="mt-5 flex flex-wrap gap-3 text-xs text-cyan-100/80">
-                {["Discotecas", "Bares musicales", "Festivales", "Ayuntamientos"].map(
-                  (chip) => (
-                    <span
-                      key={chip}
-                      className="rounded-full border border-cyan-400/40 bg-cyan-500/10 px-3 py-1"
-                    >
-                      {chip}
-                    </span>
-                  ),
-                )}
+                {[
+                  "Discotecas",
+                  "Bares musicales",
+                  "Festivales",
+                  "Ayuntamientos",
+                ].map((chip) => (
+                  <span
+                    key={chip}
+                    className="rounded-full border border-cyan-400/40 bg-cyan-500/10 px-3 py-1"
+                  >
+                    {chip}
+                  </span>
+                ))}
               </div>
 
               <Link
@@ -434,10 +536,18 @@ export default function Home() {
       <footer className="border-t border-white/10 bg-black/60">
         <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-6 text-xs text-white/50 sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <div className="flex items-center gap-2">
-            <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-gradient-to-tr from-cyan-400 to-purple-500 text-[10px] font-bold">
-              NV
+            <div className="relative h-6 w-6 overflow-hidden rounded-lg bg-white/5">
+              {/* Misma imagen de logo que en el header */}
+              <Image
+                src="/logo-nightvibe.png"
+                alt="NightVibe logo"
+                fill
+                className="object-contain"
+              />
             </div>
-            <span>© {new Date().getFullYear()} NightVibe. All rights reserved.</span>
+            <span>
+              © {new Date().getFullYear()} NightVibe. All rights reserved.
+            </span>
           </div>
           <div className="flex flex-wrap gap-4">
             <a
@@ -449,7 +559,10 @@ export default function Home() {
             <a href="https://www.tiktok.com" className="hover:text-white/80">
               TikTok
             </a>
-            <a href="mailto:hello@nightvibe.life" className="hover:text-white/80">
+            <a
+              href="mailto:hello@nightvibe.life"
+              className="hover:text-white/80"
+            >
               Contacto
             </a>
             <span className="text-white/40">nightvibe.life</span>
