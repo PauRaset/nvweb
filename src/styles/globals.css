@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Fondo oscuro global para NightVibe */
+body {
+  @apply bg-[#050816] text-white;
+}
